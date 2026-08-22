@@ -9,8 +9,12 @@
   "scripts": {
     "html:check": "node scripts/html-check.mjs",
     "html:prove": "node scripts/html-prove.mjs",
+    "bilingual:check": "node scripts/bilingual-check.mjs",
+    "bilingual:prove": "node scripts/bilingual-prove.mjs",
+    "date:check": "node scripts/date-check.mjs",
+    "date:prove": "node scripts/date-prove.mjs",
     "catalogue:status": "node scripts/catalogue-status.mjs",
     "catalogue:check": "node scripts/catalogue-status.mjs --check",
-    "check": "npm run html:check && npm run html:prove && npm run catalogue:check"
+    "check": "npm run html:check && npm run html:prove && npm run bilingual:check && npm run bilingual:prove && npm run date:check && npm run date:prove && npm run catalogue:check"
   }
 }
