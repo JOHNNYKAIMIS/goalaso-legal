@@ -25,10 +25,10 @@
     },
     {
       "id": "C02b",
-      "claim": "Για το όνομα συλλέγουμε ΜΟΝΟ όνομα εμφάνισης — όχι όνομα και επώνυμο",
-      "anchor": { "el": "αυτό που βλέπουν οι υπόλοιποι στην παρέα σου", "en": "what other members of your squad see" },
-      "app": { "kind": "absent", "pattern": "first_name|last_name", "paths": ["supabase/migrations", "apps/mobile/src"] },
-      "measured": { "date": "2026-08-22", "result": "ΔΙΑΨΕΥΣΜΕΝΟΣ", "evidence": "supabase/migrations/20260818000032_first_last_name.sql (users.first_name, users.last_name) + 9 αρχεία στο apps/mobile/src (sign-in.tsx, edit-profile.tsx: πεδίο «Όνομα») — προστέθηκε 2026-08-18, η πολιτική (2026-08-03) δεν το λέει" }
+      "claim": "Συλλέγουμε όνομα και επώνυμο, προαιρετικά, ορατά στα μέλη των παρεών",
+      "anchor": { "el": "Όνομα και επώνυμο", "en": "First and last name" },
+      "app": { "kind": "present", "pattern": "first_name|last_name", "paths": ["supabase/migrations", "apps/mobile/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "migration 20260818000032_first_last_name.sql· sign-in.tsx: firstName.trim() || null (προαιρετικά)· ADR-065 user_metadata· serialize.js σερβίρει πλήρες όνομα στα events. Ήταν ΔΙΑΨΕΥΣΜΕΝΟΣ (η πολιτική έλεγε μόνο display name) μέχρι την ενημέρωση της 22/8" }
     },
     {
       "id": "C03",
@@ -46,10 +46,17 @@
     },
     {
       "id": "C04b",
-      "claim": "Για καλεσμένους χωρίς λογαριασμό καταγράφεται ΜΟΝΟ το όνομα που δίνει ο χρήστης",
-      "anchor": { "el": "μόνο το όνομα που δίνεις εσύ καταγράφεται", "en": "only the name you provide is recorded" },
-      "app": { "kind": "absent", "pattern": "waitlist_emails", "paths": ["backend/src"] },
-      "measured": { "date": "2026-08-22", "result": "ΔΙΑΨΕΥΣΜΕΝΟΣ", "evidence": "backend/src/modules/events/waitlistRepo.js γράφει email στον πίνακα waitlist_emails (id, email, created_at)· ζωντανό route POST /waitlist στο guestRouter.js — email καλεσμένων χωρίς λογαριασμό. Επίσης guest_tokens.email στο σχήμα (χωρίς insert στο backend/src)" }
+      "claim": "Η λίστα αναμονής του goalaso.net κρατά το email μόνο για μία ειδοποίηση κυκλοφορίας",
+      "anchor": { "el": "Email λίστας αναμονής", "en": "Waitlist email" },
+      "app": { "kind": "present", "pattern": "waitlist_emails", "paths": ["backend/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "POST /waitlist (guestRouter.js) → waitlistRepo.js upsert {email} στον πίνακα waitlist_emails (id, email, created_at)· το landing (apps/guest-web strings.ts) υπόσχεται «μόνο το ήρθε». Ήταν ΔΙΑΨΕΥΣΜΕΝΟΣ (η πολιτική έλεγε «μόνο το όνομα») μέχρι την ενημέρωση της 22/8" }
+    },
+    {
+      "id": "C04c",
+      "claim": "Στο email της λίστας αναμονής δεν στέλνεται τίποτα άλλο — σήμερα δεν υπάρχει καν email provider",
+      "anchor": { "el": "τίποτα άλλο", "en": "nothing else" },
+      "app": { "kind": "absent", "pattern": "resend\\.com|api\\.resend|nodemailer|sendgrid|postmark|mailgun", "paths": ["backend/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία — κανένας email provider στο backend/src· όταν μπει, ο φύλακας κοκκινίζει και η πολιτική ξανακοιτάζεται" }
     },
     {
       "id": "C05",
@@ -109,15 +116,24 @@
     },
     {
       "id": "C12",
-      "claim": "ΚΕΝΟ: η εφαρμογή συλλέγει αναφορές σφαλμάτων (crash reports: app_version, platform, stack, route, auth_id όταν υπάρχει) — η πολιτική δεν αναφέρει διαγνωστικά",
+      "claim": "Συλλέγουμε αναφορές σφαλμάτων: έκδοση, πλατφόρμα, μήνυμα/ίχνος, τελευταίες οθόνες, αναγνωριστικό λογαριασμού μόνο αν συνδεδεμένος",
+      "anchor": { "el": "Αναφορές σφαλμάτων", "en": "Error reports" },
       "app": { "kind": "present", "pattern": "from\\('crash_reports'\\)", "paths": ["backend/src"] },
-      "measured": { "date": "2026-08-22", "result": "ΚΕΝΟ", "evidence": "backend/src/modules/diagnostics/crashStore.js γράφει crash_reports· migrations 20260806000021 (στήλη auth_id, χωρίς FK, «σχεδόν πάντα null») + 20260806000023 (route)· apps/mobile/src/lib/global-error-handler.ts, route-trail.ts" }
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "backend/src/modules/diagnostics/crashStore.js· στήλες: app_version, platform, name, message, stack, context, route, auth_id (χωρίς FK, «σχεδόν πάντα null»), fatal· apps/mobile/src/lib/global-error-handler.ts, route-trail.ts. Ήταν ΚΕΝΟ μέχρι την ενημέρωση της 22/8" }
+    },
+    {
+      "id": "C12b",
+      "claim": "Κρατάμε μόνο τις 500 πιο πρόσφατες αναφορές σφαλμάτων",
+      "anchor": { "el": "500 πιο πρόσφατες", "en": "500 most recent" },
+      "app": { "kind": "present", "pattern": "offset 500", "paths": ["supabase/migrations"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "migrations 20260806000021 + 20260806000023: delete from crash_reports … offset 500 (κρατά τις 500 πιο πρόσφατες)" }
     },
     {
       "id": "C13",
-      "claim": "ΚΕΝΟ: επεξεργαστές που η πολιτική δεν κατονομάζει — ο API server τρέχει σε Render (Frankfurt), τα OTA updates μέσω Expo (u.expo.dev)",
+      "claim": "Ο διακομιστής της εφαρμογής τρέχει στη Render (Φρανκφούρτη) και τα updates περνούν από Expo EAS Update",
+      "anchor": { "el": "τρέχει στη Render", "en": "runs on Render" },
       "app": { "kind": "present", "pattern": "region: frankfurt|u\\.expo\\.dev", "paths": ["render.yaml", "apps/mobile/app.json"] },
-      "measured": { "date": "2026-08-22", "result": "ΚΕΝΟ", "evidence": "render.yaml: region: frankfurt (goalaso-api)· apps/mobile/app.json: updates.url https://u.expo.dev/…· η πολιτική λέει μόνο «υποδομή Supabase»" }
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "render.yaml: goalaso-api region frankfurt· apps/mobile/app.json: updates.url https://u.expo.dev/…, runtimeVersion. Ήταν ΚΕΝΟ μέχρι την ενημέρωση της 22/8" }
     },
     {
       "id": "C14",
@@ -132,6 +148,12 @@
       "anchor": { "el": "δεν απευθύνεται σε παιδιά κάτω των 18", "en": "not directed at children under 18" },
       "app": { "kind": "manual", "how": "δήλωση πρόθεσης· δεν υπάρχει age gate στον κώδικα — απόφαση ιδιοκτήτη αν χρειάζεται" },
       "measured": { "date": "2026-08-22", "result": "ΔΕΝ ΕΛΕΓΧΕΤΑΙ ΑΥΤΟΜΑΤΑ", "evidence": "καμία πύλη ηλικίας στο apps/mobile/src (δεν μετρήθηκε με pattern — δήλωση διαδικασίας)" }
+    },
+    {
+      "id": "C16",
+      "claim": "ΚΕΝΟ: η ιστοσελίδα goalaso.net συλλέγει email στη λίστα αναμονής χωρίς κανέναν σύνδεσμο προς την πολιτική απορρήτου",
+      "app": { "kind": "absent", "pattern": "goalaso-legal|privacy\\.html|απόρρητ", "paths": ["apps/guest-web/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΚΕΝΟ", "evidence": "0 αναφορές σε πολιτική απορρήτου στο apps/guest-web/src (Landing.tsx, strings.ts) ενώ το POST /waitlist συλλέγει email· διορθώνεται μόνο στο repo της εφαρμογής (σύνδεσμος στο footer/φόρμα)" }
     }
   ]
 }
