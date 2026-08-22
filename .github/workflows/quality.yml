@@ -1,0 +1,49 @@
+name: quality
+
+# Κλάση G04 (docs/failure-catalogue/G04-nothing-runs-on-push.md): κάθε push και κάθε PR περνά από τους φύλακες.
+# Καμία εξάρτηση, κανένα npm install — μόνο το Node του runner.
+# Το main είναι η παραγωγή (GitHub Pages): το workflow τρέχει και σε pull_request ώστε το κόκκινο να φανεί ΠΡΙΝ το merge.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: "html check + prove + catalogue status"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      # deploy:check (G05): σε push στο main περιμένει το Pages deploy έως 600 s· αλλού το live είναι ήδη το main
+      DEPLOY_CHECK_TIMEOUT: ${{ github.ref == 'refs/heads/main' && '600' || '60' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # ο date:check (G03) χρειάζεται πλήρες ιστορικό — ρηχό clone = exit 2
+      - name: "Node του runner"
+        run: node --version
+      - name: "html:check — G04 (α) δομή, (β) εσωτερικά links, (γ) κωδικοποίηση"
+        run: node scripts/html-check.mjs
+      - name: "html:prove — απόδειξη ότι ο φύλακας κοκκινίζει όταν σπάσει ό,τι φυλάει"
+        run: node scripts/html-prove.mjs
+      - name: "bilingual:check — G02 δομή/ημερομηνία/lang EL = EN"
+        run: node scripts/bilingual-check.mjs
+      - name: "bilingual:prove — απόδειξη G02"
+        run: node scripts/bilingual-prove.mjs
+      - name: "date:check — G03 ημερομηνία σελίδας = τελευταίο ουσιώδες commit"
+        run: node scripts/date-check.mjs
+      - name: "date:prove — απόδειξη G03 (προσωρινά git repos)"
+        run: node scripts/date-prove.mjs
+      - name: "deploy:check — G05 το live σερβίρει byte-προς-byte το origin/main (χωρίς CDN cache)"
+        run: node scripts/deploy-check.mjs
+      - name: "deploy:prove — απόδειξη G05 (τοπικός HTTP server)"
+        run: node scripts/deploy-prove.mjs
+      - name: "claims:check — G01 ο κατάλογος ισχυρισμών δένει με το κείμενο, χρέος με λήξη, μέτρηση όχι παλιότερη από 60 ημέρες"
+        run: node scripts/claims-check.mjs
+      - name: "claims:prove — απόδειξη G01 (συνθετικός κατάλογος + ψεύτικη εφαρμογή)"
+        run: node scripts/claims-prove.mjs
+      - name: "catalogue:check — το STATUS.md παράγεται από τους φύλακες, δεν γράφεται"
+        run: node scripts/catalogue-status.mjs --check

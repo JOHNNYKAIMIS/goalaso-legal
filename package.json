@@ -1,0 +1,24 @@
+{
+  "name": "goalaso-legal",
+  "private": true,
+  "description": "Νομικές σελίδες Goalaso — φύλακες ποιότητας, χωρίς εξαρτήσεις (βλ. docs/SCORECARD.md)",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "html:check": "node scripts/html-check.mjs",
+    "html:prove": "node scripts/html-prove.mjs",
+    "bilingual:check": "node scripts/bilingual-check.mjs",
+    "bilingual:prove": "node scripts/bilingual-prove.mjs",
+    "date:check": "node scripts/date-check.mjs",
+    "date:prove": "node scripts/date-prove.mjs",
+    "deploy:check": "node scripts/deploy-check.mjs",
+    "deploy:prove": "node scripts/deploy-prove.mjs",
+    "claims:check": "node scripts/claims-check.mjs",
+    "claims:prove": "node scripts/claims-prove.mjs",
+    "catalogue:status": "node scripts/catalogue-status.mjs",
+    "catalogue:check": "node scripts/catalogue-status.mjs --check",
+    "check": "npm run html:check && npm run html:prove && npm run bilingual:check && npm run bilingual:prove && npm run date:check && npm run date:prove && npm run deploy:check && npm run deploy:prove && npm run claims:check && npm run claims:prove && npm run catalogue:check"
+  }
+}
