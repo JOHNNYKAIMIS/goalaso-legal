@@ -25,9 +25,10 @@ function dir(label) {
   mkdirSync(d);
   return d;
 }
-function git(d, args, date) {
+// date = author date· committerDate (προαιρετικό) = committer date, για να παιχτεί rebase/merge που αλλάζει μόνο τη δεύτερη
+function git(d, args, date, committerDate) {
   const env = { ...process.env };
-  if (date) { env.GIT_AUTHOR_DATE = date; env.GIT_COMMITTER_DATE = date; }
+  if (date) { env.GIT_AUTHOR_DATE = date; env.GIT_COMMITTER_DATE = committerDate ?? date; }
   const r = spawnSync('git', args, { cwd: d, encoding: 'utf8', env });
   if (r.status !== 0) throw new Error(`git ${args.join(' ')} → exit ${r.status}: ${r.stderr}`);
   return r.stdout;
@@ -41,9 +42,9 @@ function repo(label) {
   git(d, ['config', 'core.autocrlf', 'false']);
   return d;
 }
-function commit(d, date, subject) {
+function commit(d, date, subject, committerDate) {
   git(d, ['add', '-A']);
-  git(d, ['commit', '-q', '--no-verify', '-m', subject], date);
+  git(d, ['commit', '-q', '--no-verify', '-m', subject], date, committerDate);
 }
 function run(d, today = TODAY) {
   const r = spawnSync(process.execPath, [CHECK, d], { encoding: 'utf8', env: { ...process.env, KNOWN_DEBT_TODAY: today } });
@@ -126,6 +127,14 @@ const MUTATIONS = [
   ['exception-unknown-file', 'ΝΕΚΡΗ', () => { const d = dated('exception-unknown'); debt(d, [entry('nope.html', '2026-08-04', '2026-08-03')]); return d; }],
   ['exception-no-reason', 'χωρίς «reason»', () => { const d = dated('no-reason', '4 Αυγούστου 2026', 'August 4, 2026'); debt(d, [entry('privacy.html', '2026-08-04', '2026-08-03', { reason: '' })]); return d; }],
   ['exception-expired', 'ΕΛΗΞΕ', () => { const d = dated('expired', '4 Αυγούστου 2026', 'August 4, 2026'); debt(d, [entry('privacy.html', '2026-08-04', '2026-08-03', { expires: '2026-09-21' })]); return d; }, '2026-09-22'],
+  ['squash-merge-makes-new-author-date', '≠ τελευταίο ουσιώδες commit', () => {
+    // «Squash and merge»: νέο commit με author date = μέρα του merge, ενώ η σελίδα λέει τη μέρα του αρχικού commit
+    const d = repo('squash-merge');
+    writeFileSync(join(d, 'privacy.html'), page('3 Αυγούστου 2026', 'August 3, 2026'));
+    writeFileSync(join(d, 'index.html'), undatedPage);
+    commit(d, D2, 'Squash merge of PR', D2);
+    return d;
+  }],
 ];
 const INNOCENT = [
   ['no-date-commit-ignored', () => {
@@ -145,6 +154,14 @@ const INNOCENT = [
     debt(d, [entry('privacy.html', '2026-08-04', '2026-08-03')]);
     return d;
   }, '1 γνωστό χρέος'],
+  ['rebase-or-merge-commit-keeps-author-date', () => {
+    // «Rebase and merge» / merge commit: η committer date γίνεται η μέρα του merge, η author date μένει — η σελίδα λέει αλήθεια
+    const d = repo('rebase-merge');
+    writeFileSync(join(d, 'privacy.html'), page('3 Αυγούστου 2026', 'August 3, 2026'));
+    writeFileSync(join(d, 'index.html'), undatedPage);
+    commit(d, D1, 'Initial legal pages (rebased on merge)', D2);
+    return d;
+  }, '1/1 = τελευταίο ουσιώδες commit'],
 ];
 
 let red = 0;

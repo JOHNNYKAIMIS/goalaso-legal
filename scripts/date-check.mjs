@@ -1,7 +1,10 @@
 #!/usr/bin/env node
 // date:check — φύλακας της κλάσης G03 (docs/failure-catalogue/G03-hand-maintained-date.md).
 // Σε κάθε σελίδα με γραμμή «Τελευταία ενημέρωση: D Μήνας YYYY», η ημερομηνία πρέπει να ισούται με την ημερομηνία
-// (committer, YYYY-MM-DD, `git log --format=%cs`) του ΤΕΛΕΥΤΑΙΟΥ ΟΥΣΙΩΔΟΥΣ commit που άγγιξε το αρχείο.
+// (AUTHOR, YYYY-MM-DD, `git log --format=%as`) του ΤΕΛΕΥΤΑΙΟΥ ΟΥΣΙΩΔΟΥΣ commit που άγγιξε το αρχείο.
+// Author date και όχι committer: το «Rebase and merge» και το merge commit την κρατούν, ενώ η committer date αλλάζει
+// στο merge και θα κοκκίνιζε το main αμέσως μετά. Το «Squash and merge» φτιάχνει ΝΕΟ commit με σημερινή author date
+// → η σελίδα πρέπει τότε να λέει τη μέρα του merge. Βλ. G03 «Πώς γίνεται merge».
 // Μη ουσιώδη commits (τυπογραφικά, markup, lang attributes) δηλώνονται με [no-date] στο θέμα και αγνοούνται.
 // Η συμφωνία EL ↔ EN της ίδιας ημερομηνίας είναι δουλειά του bilingual-check (G02).
 // Γνωστό χρέος: docs/known-debt.json → "date": [{ file, pageDate, commitDate, reason, measured, expires }]
@@ -49,7 +52,7 @@ function main() {
     const entry = debt.entries.find((e) => e.file === f);
     if (!d.el.iso) { errors.push(`${f}:${d.el.line}: η ημερομηνία «${d.el.raw}» δεν διαβάζεται — περιμένω «D Μήνας YYYY» (π.χ. 3 Αυγούστου 2026)`); continue; }
 
-    const log = git(['log', '--format=%h%x09%cs%x09%s', '--', f]);
+    const log = git(['log', '--format=%h%x09%as%x09%s', '--', f]);
     if (log.code !== 0) { errors.push(`${f}: git log απέτυχε — ${log.err}`); continue; }
     if (log.out === '') { errors.push(`${f}: χωρίς ιστορικό git (untracked ή νέο αρχείο χωρίς commit) — δεν μπορώ να κρίνω την ημερομηνία`); continue; }
     const commits = log.out.split('\n').map((l) => { const [h, date, ...s] = l.split('\t'); return { h, date, subject: s.join('\t') }; });

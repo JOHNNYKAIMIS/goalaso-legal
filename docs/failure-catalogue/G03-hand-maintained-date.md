@@ -54,6 +54,15 @@ commit 30421cc 2026-08-03`. Το terms.html (3 Αυγούστου = `9bfa4b6 202
 ημερομηνία στη μέρα του commit (ουσιώδης αλλαγή — ο χρήστης πρέπει να το μάθει), είτε φέρει
 `[no-date]` στο θέμα (τυπογραφικό, markup, `lang`). Δεν υπάρχει τρίτη επιλογή — ο φύλακας πέφτει.
 
+**Πώς γίνεται merge (γύρος 5 — 2026-08-22):** ο φύλακας συγκρίνει με την **author date** (`%as`),
+όχι την committer date — γιατί το «Rebase and merge» και το merge commit κρατούν την author date και
+αλλάζουν μόνο την committer, οπότε με `%cs` το main θα κοκκίνιζε αμέσως μετά από κάθε merge PR που
+αγγίζει σελίδα. Το **«Squash and merge» φτιάχνει νέο commit με author date τη μέρα του merge**: αν
+γίνει squash, η σελίδα πρέπει να λέει τη μέρα του merge, αλλιώς κόκκινο (η απόδειξη το δείχνει:
+`squash-merge-makes-new-author-date` → κόκκινο, `rebase-or-merge-commit-keeps-author-date` → πράσινο).
+Σύσταση: στο repo, Settings → Pull Requests → απενεργοποίηση του «Allow squash merging» (απόφαση
+ιδιοκτήτη).
+
 **Δρόμος κλεισίματος του χρέους (απόφαση ιδιοκτήτη):** commit `[no-date] privacy: ημερομηνία 3
 Αυγούστου 2026` (και «August 3, 2026») + αφαίρεση της εγγραφής από το known-debt.json. Τότε το
 τελευταίο ουσιώδες commit παραμένει το `30421cc` (2026-08-03) και η σελίδα λέει αλήθεια.
