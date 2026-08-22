@@ -15,7 +15,10 @@ jobs:
   quality:
     name: "html check + prove + catalogue status"
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
+    env:
+      # deploy:check (G05): σε push στο main περιμένει το Pages deploy έως 600 s· αλλού το live είναι ήδη το main
+      DEPLOY_CHECK_TIMEOUT: ${{ github.ref == 'refs/heads/main' && '600' || '60' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -34,5 +37,9 @@ jobs:
         run: node scripts/date-check.mjs
       - name: "date:prove — απόδειξη G03 (προσωρινά git repos)"
         run: node scripts/date-prove.mjs
+      - name: "deploy:check — G05 το live σερβίρει byte-προς-byte το origin/main (χωρίς CDN cache)"
+        run: node scripts/deploy-check.mjs
+      - name: "deploy:prove — απόδειξη G05 (τοπικός HTTP server)"
+        run: node scripts/deploy-prove.mjs
       - name: "catalogue:check — το STATUS.md παράγεται από τους φύλακες, δεν γράφεται"
         run: node scripts/catalogue-status.mjs --check

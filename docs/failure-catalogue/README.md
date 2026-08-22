@@ -20,6 +20,7 @@
 | G02 | [Δίγλωσση απόκλιση EL ↔ EN](G02-bilingual-divergence.md) |
 | G03 | [Χειρόγραφη ημερομηνία «Τελευταία ενημέρωση»](G03-hand-maintained-date.md) |
 | G04 | [Τίποτα δεν τρέχει σε push](G04-nothing-runs-on-push.md) |
+| G05 | [Το ζωντανό site αποκλίνει από το main](G05-live-diverges-from-main.md) |
 
 Κατάσταση ανά κλάση: **[STATUS.md](STATUS.md)** (παράγεται — `ls docs/failure-catalogue/G*.md`
 = οι κλάσεις, `node scripts/catalogue-status.mjs` = η κατάστασή τους).

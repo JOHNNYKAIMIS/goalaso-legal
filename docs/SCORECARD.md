@@ -5,6 +5,7 @@
 > Γύρος 1: 2026-08-22 — κλάση G04 απέκτησε φύλακα με απόδειξη (branch `g04-quality-workflow`).
 > Γύρος 2: 2026-08-22 — κλάσεις G02 + G03 απέκτησαν φύλακες με απόδειξη (branch `g02-g03-guards`)·
 > το σημερινό χρέος κλειδώθηκε στο [docs/known-debt.json](known-debt.json) με λόγο και λήξη 2026-09-21.
+> Γύρος 3: 2026-08-22 — νέα κλάση G05 (το live αποκλίνει από το main) με φύλακα και απόδειξη (branch `g05-deploy-smoke`).
 > Κάθε γραμμή έχει anchor που ΤΡΕΞΕ — όχι εντύπωση. Βαθμός ανεβαίνει ΜΟΝΟ όταν ξαναμετρηθεί.
 
 ## Τι είναι αυτό το repo (χαρτογράφηση 2026-08-21)
@@ -38,8 +39,9 @@ test, κανένα CI (`ls -A .github 2>/dev/null` → τίποτα στις 202
 
 **Τι το εμποδίζει σήμερα:** από τον γύρο 1 ο φύλακας G04 (δομή HTML, εσωτερικά links,
 κωδικοποίηση) και από τον γύρο 2 οι φύλακες G02 (δομή/ημερομηνία/γλώσσα EL = EN) και G03
-(ημερομηνία σελίδας = τελευταίο ουσιώδες commit), όλοι με απόδειξη, σε κάθε push/PR. Για το
-χειρότερο σφάλμα (G01): ακόμα τίποτα (`node scripts/catalogue-status.mjs` →
+(ημερομηνία σελίδας = τελευταίο ουσιώδες commit), όλοι με απόδειξη, σε κάθε push/PR. Από τον
+γύρο 3 ο φύλακας G05: το live σερβίρει byte-προς-byte το `origin/main`, χωρίς CDN cache, σε κάθε
+push/PR και καθημερινά (`deploy-smoke.yml`). Για το χειρότερο σφάλμα (G01): ακόμα τίποτα (`node scripts/catalogue-status.mjs` →
 [STATUS.md](failure-catalogue/STATUS.md)). Το σημερινό χρέος (λάθος ημερομηνία στο privacy,
 `lang="en"` σε 0/2 σελίδες) ΠΑΡΑΜΕΝΕΙ στις σελίδες — κλειδωμένο, με λήξη, όχι διορθωμένο:
 η διόρθωση αλλάζει HTML = παραγωγή = απόφαση ιδιοκτήτη.
@@ -68,12 +70,12 @@ test, κανένα CI (`ls -A .github 2>/dev/null` → τίποτα στις 202
 |---|---|---|---|---|
 | Ισοδυναμία EL ↔ EN | **7** | 9 | Δομικά ΟΚ (2026-08-21: terms 8/8 h2, privacy 4/4 bullets, ημερομηνίες ίδιες) ΑΛΛΑ απόκλιση περιεχομένου: η σημείωση «προσωρινό email» υπάρχει ΜΟΝΟ στα ελληνικά. Επιπλέον (2026-08-22): `lang="en"` σε **0/2 δίγλωσσες** σελίδες (το index.html είναι μονόγλωσσο — το «0/3» ήταν grep), το αγγλικό μισό δηλώνεται ελληνικό. **Γύρος 2 (2026-08-22):** φύλακας `bilingual:check` — h2/ul/li/a/p EL = EN (με εξαίρεση το EL-only `lang-note`), ημερομηνία EL = EN, αγγλικό τμήμα σε `lang="en"`· απόδειξη `bilingual:prove` 12/12 κόκκινες, 3/3 αθώες πράσινες, fail-closed 2/2. Μετρήθηκε: h2 7=7/8=8 · ul 2=2/0=0 · li 8=8/0=0 · a 3=3/1=1 · p 7=7/10=10, ημερομηνίες 2/2, lang="en" 0/2 → γνωστό χρέος (λήγει 2026-09-21). Αναπαραγωγή: χωρίς known-debt → ΚΟΚΚΙΝΟ (2 σφάλματα). 5 → **7**: μηχανισμός αποδεδειγμένος, το χρέος ζει· η σημασιολογική απόκλιση («προσωρινό») ΔΕΝ πιάνεται από φύλακα — μόνο άνθρωπος. **Για 9:** `<section lang="en">` και στις 2 σελίδες (commit `[no-date]`), αφαίρεση εγγραφών χρέους, η EN σημείωση «προσωρινό» (ανθρώπινη απόφαση), merge + ξαναμέτρηση ([G02](failure-catalogue/G02-bilingual-divergence.md)) | `node scripts/bilingual-check.mjs` · `grep -c 'lang="en"' privacy.html terms.html` |
 
-## Γ. Μηχανική παράδοσης — (7+7)/2 = 7,0/10
+## Γ. Μηχανική παράδοσης — (7+8)/2 = 7,5/10
 
 | Διάσταση | Τωρινό | Στόχος | Μέτρηση & επόμενο βήμα | Anchor |
 |---|---|---|---|---|
 | Έλεγχοι σε κάθε αλλαγή | **7** | 9 | Ήταν 2 (2026-08-21: κανένα workflow στο repo, κανένα script· 2026-08-22: το push του `cc73d1f` πυροδότησε 0 runs — `gh api ".../actions/runs?branch=quality-baseline" --jq .total_count`). **Γύρος 1 (2026-08-22):** `quality.yml` σε push + PR με φύλακα `html:check` για (α) δομή HTML, (β) εσωτερικά links, (γ) κωδικοποίηση, απόδειξη `html:prove`, και `catalogue:check` για το παραγόμενο STATUS.md. Μετρήθηκε τοπικά ΚΑΙ στο CI (run `32567108802` @ `f55353f` → success, 6/6 βήματα, ίδιες γραμμές λογοδοσίας στο log — `gh run view 32567108802 --log \| grep '✓'`): ✓ 3 αρχεία, 2/2 εσωτερικά links, 2 εξωτερικά (ΔΕΝ ελέγχθηκαν), 0 mojibake· prove 13/13 μεταλλάξεις κόκκινες, 5/5 αθώες πράσινες, fail-closed 2/2. Η απόδειξη έπιασε false positive της 1ης έκδοσης ΠΡΙΝ μπει στο CI ([G04](failure-catalogue/G04-nothing-runs-on-push.md)). **Γύρος 2:** (δ) ΕΓΙΝΕ — οι φύλακες G02 + G03 με αποδείξεις μέσα στο ίδιο workflow (`fetch-depth: 0`). 2 → **7**: μηχανισμός υπάρχει και αποδείχθηκε, ΑΛΛΑ το main δεν το έχει — η ετυμηγορία μετρά στο SHA του trunk. **Για 9:** merge στο main και πράσινο run εκεί (ξαναμέτρηση) | `ls .github/workflows` · `npm run check` · `gh run list --workflow quality --limit 3` |
-| Το ζωντανό deploy σερβίρει το HEAD | **7** | 9 | Μετρήθηκε 2026-08-22 (στις 2026-08-21 το egress προς `johnnykaimis.github.io` / `goalaso.net` ήταν μπλοκαρισμένο): `curl` τα 3 αρχεία από `https://johnnykaimis.github.io/goalaso-legal/` + `diff` με το HEAD → **3/3 IDENTICAL**· τελευταίο run `pages build and deployment` @ `30421cc` success. Μηχανισμός υπάρχει (αυτόματο deploy από main), τίποτα δεν το ελέγχει μετά — πρώτη μέτρηση, όχι άνοδος. **Παγίδα:** `gh api repos/JOHNNYKAIMIS/goalaso-legal/pages/builds/latest --jq .commit` δείχνει `9bfa4b6` (το ΠΡΟΗΓΟΥΜΕΝΟ commit) ενώ το περιεχόμενο είναι του `30421cc` — μέτρα με diff περιεχομένου, ποτέ με αυτό το πεδίο. **Για 9:** post-deploy smoke που κάνει diff live ↔ HEAD και κοκκινίζει ([G04](failure-catalogue/G04-nothing-runs-on-push.md)) | `for f in index privacy terms; do curl -s https://johnnykaimis.github.io/goalaso-legal/$f.html \| diff -q - $f.html; done` |
+| Το ζωντανό deploy σερβίρει το HEAD | **8** | 9 | Μετρήθηκε 2026-08-22 (στις 2026-08-21 το egress ήταν μπλοκαρισμένο): 3/3 αρχεία byte-identical με το HEAD· run `pages build and deployment` @ `30421cc` success → 7 (μηχανισμός, καμία επαλήθευση). **Παγίδες (μετρημένες):** `gh api .../pages/builds/latest --jq .commit` δείχνει `9bfa4b6` (το ΠΡΟΗΓΟΥΜΕΝΟ commit) ενώ σερβίρεται το `30421cc`· `Cache-Control: max-age=600` — το CDN σερβίρει έως 10 λεπτά παλιό περιεχόμενο, έλεγχος χωρίς cache-buster θα έλεγε «όλα καλά» σε παλιό. **Γύρος 3 (2026-08-22):** φύλακας `deploy:check` — κάθε `*.html` του `origin/main` (όχι του checkout — σε PR το live είναι ακόμα το main) κατεβαίνει με `?nocache=` + `Cache-Control: no-cache` και συγκρίνεται byte-προς-byte, με αναμονή για το deploy (600 s σε push στο main)· μετρήθηκε ✓ 3/3 (603 / 8104 / 5941 B) σε 0,2 s. Απόδειξη `deploy:prove` σε τοπικό HTTP server: 4/4 κόκκινες (1 byte διαφορά, 404, 500, παλιό πέρα από το παράθυρο), 4/4 αθώες (ίδια bytes, παλιό που φρεσκάρει μέσα στο παράθυρο, άλλα headers, cache-buster σε κάθε αίτημα), fail-closed 3/3 (ref λείπει, 0 αρχεία, server κλειστός). Η απόδειξη έπιασε crash του φύλακα στα Windows (`process.exit` μετά από `fetch`) πριν το CI. Τρέχει σε κάθε push/PR (`quality.yml`) και καθημερινά (`deploy-smoke.yml`, drift). 7 → **8**: αποδεδειγμένος μηχανισμός, αλλά ΔΕΝ έχει τρέξει ακόμα μετά από πραγματικό deploy (το main δεν το έχει). **Για 9:** merge, πρώτος πράσινος run στο main μετά από push (με την αναμονή), πρώτος scheduled run ([G05](failure-catalogue/G05-live-diverges-from-main.md)) | `node scripts/deploy-check.mjs` · `gh run list --workflow deploy-smoke --limit 3` |
 
 ## Πώς μένει αληθινό
 
