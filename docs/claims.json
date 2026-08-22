@@ -1,0 +1,137 @@
+{
+  "_": "Ελέγξιμοι ισχυρισμοί της πολιτικής απορρήτου ↔ ο κώδικας της εφαρμογής (JOHNNYKAIMIS/goalaso). Κάθε ισχυρισμός δένει με το κείμενο (anchor EL + EN, ακριβές απόσπασμα) και με μια μέτρηση στον κώδικα (present = το pattern πρέπει να υπάρχει, absent = πρέπει να λείπει, manual = μόνο άνθρωπος). Φύλακας: node scripts/claims-check.mjs [--app <φάκελος εφαρμογής>]. Αποτελέσματα: ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ · ΔΙΑΨΕΥΣΜΕΝΟΣ · ΚΕΝΟ (η εφαρμογή κάνει κάτι που η πολιτική δεν λέει) · ΔΕΝ ΕΛΕΓΧΕΤΑΙ ΑΥΤΟΜΑΤΑ · ΔΕΝ ΜΕΤΡΗΘΗΚΕ. ΔΙΑΨΕΥΣΜΕΝΟΣ/ΚΕΝΟ απαιτούν εγγραφή στο known-debt.json με λόγο και λήξη.",
+  "page": "privacy.html",
+  "maxAgeDays": 60,
+  "app": {
+    "repo": "https://github.com/JOHNNYKAIMIS/goalaso",
+    "localPath": "../goalaso",
+    "measuredAt": "2026-08-22",
+    "commit": "ad56785"
+  },
+  "claims": [
+    {
+      "id": "C01",
+      "claim": "Συλλέγουμε email διεύθυνση για τη δημιουργία και σύνδεση λογαριασμού",
+      "anchor": { "el": "Email διεύθυνση", "en": "Email address" },
+      "app": { "kind": "present", "pattern": "signInWithOtp|signInWithPassword|signUp\\(", "paths": ["apps/mobile/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "2 αρχεία: apps/mobile/src/app/sign-in.tsx, apps/mobile/src/lib/supabase.ts" }
+    },
+    {
+      "id": "C02",
+      "claim": "Συλλέγουμε όνομα εμφάνισης (display name)",
+      "anchor": { "el": "Όνομα εμφάνισης (display name)", "en": "Display name" },
+      "app": { "kind": "present", "pattern": "display_name", "paths": ["supabase/migrations", "apps/mobile/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "users.display_name (baseline migration) + χρήση στο apps/mobile/src" }
+    },
+    {
+      "id": "C02b",
+      "claim": "Για το όνομα συλλέγουμε ΜΟΝΟ όνομα εμφάνισης — όχι όνομα και επώνυμο",
+      "anchor": { "el": "αυτό που βλέπουν οι υπόλοιποι στην παρέα σου", "en": "what other members of your squad see" },
+      "app": { "kind": "absent", "pattern": "first_name|last_name", "paths": ["supabase/migrations", "apps/mobile/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΔΙΑΨΕΥΣΜΕΝΟΣ", "evidence": "supabase/migrations/20260818000032_first_last_name.sql (users.first_name, users.last_name) + 9 αρχεία στο apps/mobile/src (sign-in.tsx, edit-profile.tsx: πεδίο «Όνομα») — προστέθηκε 2026-08-18, η πολιτική (2026-08-03) δεν το λέει" }
+    },
+    {
+      "id": "C03",
+      "claim": "Συλλέγουμε περιεχόμενο δραστηριότητας: παρέες, ματς, RSVP, ρόστερ, αποτελέσματα, ψήφους MVP, αντιδράσεις, γκάλοπ",
+      "anchor": { "el": "Περιεχόμενο δραστηριότητας", "en": "Activity content" },
+      "app": { "kind": "present", "pattern": "create table (if not exists )?(public\\.)?(events|event_participants|results|mvp_votes|match_reactions|polls)\\b", "paths": ["supabase/migrations"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "πίνακες events, event_participants, results, mvp_votes, match_reactions, polls στο σχήμα" }
+    },
+    {
+      "id": "C04",
+      "claim": "Το token πρόσκλησης αποθηκεύεται hashed",
+      "anchor": { "el": "το token πρόσκλησης αποθηκεύεται κρυπτογραφημένα/hashed", "en": "the invite token itself is stored hashed" },
+      "app": { "kind": "present", "pattern": "invite_token_hash|token_hash", "paths": ["supabase/migrations"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "events.invite_token_hash (ADR-005: sha256), guest_tokens.token_hash, group_rivalry_invites.token_hash" }
+    },
+    {
+      "id": "C04b",
+      "claim": "Για καλεσμένους χωρίς λογαριασμό καταγράφεται ΜΟΝΟ το όνομα που δίνει ο χρήστης",
+      "anchor": { "el": "μόνο το όνομα που δίνεις εσύ καταγράφεται", "en": "only the name you provide is recorded" },
+      "app": { "kind": "absent", "pattern": "waitlist_emails", "paths": ["backend/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΔΙΑΨΕΥΣΜΕΝΟΣ", "evidence": "backend/src/modules/events/waitlistRepo.js γράφει email στον πίνακα waitlist_emails (id, email, created_at)· ζωντανό route POST /waitlist στο guestRouter.js — email καλεσμένων χωρίς λογαριασμό. Επίσης guest_tokens.email στο σχήμα (χωρίς insert στο backend/src)" }
+    },
+    {
+      "id": "C05",
+      "claim": "Καμία φωτογραφία προφίλ, καμία πρόσβαση σε κάμερα/gallery",
+      "anchor": { "el": "Καμία φωτογραφία προφίλ", "en": "No profile photos" },
+      "app": { "kind": "absent", "pattern": "expo-image-picker|expo-camera|expo-media-library|react-native-image-picker", "paths": ["apps/mobile/package.json", "apps/mobile/app.json"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία· users.avatar_url υπάρχει στο σχήμα αλλά 0 χρήσεις σε apps/mobile/src και backend/src" }
+    },
+    {
+      "id": "C06",
+      "claim": "Καμία live τοποθεσία GPS",
+      "anchor": { "el": "Καμία live τοποθεσία GPS", "en": "No live GPS location" },
+      "app": { "kind": "absent", "pattern": "expo-location|react-native-geolocation|@react-native-community/geolocation", "paths": ["apps/mobile/package.json", "apps/mobile/app.json"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία" }
+    },
+    {
+      "id": "C07",
+      "claim": "Κανένα στοιχείο πληρωμής — δεν επεξεργαζόμαστε πληρωμές",
+      "anchor": { "el": "Κανένα στοιχείο πληρωμής", "en": "No payment data" },
+      "app": { "kind": "absent", "pattern": "stripe|revenuecat|react-native-iap|expo-in-app-purchases|react-native-purchases", "paths": ["apps/mobile/package.json", "backend/package.json"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία" }
+    },
+    {
+      "id": "C08",
+      "claim": "Καμία διαφημιστική ταυτότητα, καμία διαφήμιση, κανένα third-party ad SDK",
+      "anchor": { "el": "Καμία διαφημιστική ταυτότητα", "en": "No advertising identifiers" },
+      "app": { "kind": "absent", "pattern": "admob|google-mobile-ads|react-native-fbads|appsflyer|adjust-sdk|expo-ads|expo-tracking-transparency|advertisingId", "paths": ["apps/mobile/package.json", "apps/mobile/app.json", "apps/mobile/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία (το «@sentry/react-native» στο package.json είναι string σε jest transformIgnorePatterns, όχι dependency)" }
+    },
+    {
+      "id": "C09",
+      "claim": "Τα δεδομένα φιλοξενούνται σε Supabase (PostgreSQL) στη Φρανκφούρτη (ΕΕ)",
+      "anchor": { "el": "στην περιοχή Φρανκφούρτης", "en": "in the Frankfurt, Germany region" },
+      "app": { "kind": "present", "pattern": "frankfurt|eu-central-1", "paths": ["render.yaml", "docs/owner-setup-guide.md"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "docs/owner-setup-guide.md: «Region και για τα δύο: Frankfurt (eu-central-1)»· render.yaml region: frankfurt. ΔΕΝ ΜΕΤΡΗΘΗΚΕ η περιοχή του live Supabase project (θέλει dashboard)" }
+    },
+    {
+      "id": "C10",
+      "claim": "Δεν πουλάμε ούτε μοιραζόμαστε δεδομένα με τρίτους για διαφημιστικούς σκοπούς",
+      "anchor": { "el": "Δεν πουλάμε ούτε μοιραζόμαστε", "en": "We do not sell or share" },
+      "app": { "kind": "absent", "pattern": "admob|google-mobile-ads|appsflyer|adjust-sdk|segment|mixpanel|amplitude|posthog", "paths": ["apps/mobile/package.json", "backend/package.json"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία — κανένα SDK διαφήμισης/analytics τρίτων" }
+    },
+    {
+      "id": "C11",
+      "claim": "Διαγραφή λογαριασμού μέσα από την εφαρμογή, άμεση και οριστική",
+      "anchor": { "el": "Προφίλ → Διαγραφή λογαριασμού", "en": "Profile → Delete account" },
+      "app": { "kind": "present", "pattern": "auth\\.admin\\.deleteUser|delete_account|deleteAccount", "paths": ["backend/src", "apps/mobile/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "backend/src/modules/identity/router.js: auth.admin.deleteUser(authId)· apps/mobile/src/app/(tabs)/profile.tsx" }
+    },
+    {
+      "id": "C11b",
+      "claim": "Μετά τη διαγραφή τα ματς μένουν στο ιστορικό χωρίς το όνομα (ανωνυμοποίηση)",
+      "anchor": { "el": "χωρίς το όνομά σου", "en": "without your name" },
+      "app": { "kind": "present", "pattern": "anonymize", "paths": ["backend/src", "supabase/migrations"] },
+      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "supabase/migrations/20260814000028_users_deleted_at.sql (anonymize, deleted_at)· backend users repo anonymize()" }
+    },
+    {
+      "id": "C12",
+      "claim": "ΚΕΝΟ: η εφαρμογή συλλέγει αναφορές σφαλμάτων (crash reports: app_version, platform, stack, route, auth_id όταν υπάρχει) — η πολιτική δεν αναφέρει διαγνωστικά",
+      "app": { "kind": "present", "pattern": "from\\('crash_reports'\\)", "paths": ["backend/src"] },
+      "measured": { "date": "2026-08-22", "result": "ΚΕΝΟ", "evidence": "backend/src/modules/diagnostics/crashStore.js γράφει crash_reports· migrations 20260806000021 (στήλη auth_id, χωρίς FK, «σχεδόν πάντα null») + 20260806000023 (route)· apps/mobile/src/lib/global-error-handler.ts, route-trail.ts" }
+    },
+    {
+      "id": "C13",
+      "claim": "ΚΕΝΟ: επεξεργαστές που η πολιτική δεν κατονομάζει — ο API server τρέχει σε Render (Frankfurt), τα OTA updates μέσω Expo (u.expo.dev)",
+      "app": { "kind": "present", "pattern": "region: frankfurt|u\\.expo\\.dev", "paths": ["render.yaml", "apps/mobile/app.json"] },
+      "measured": { "date": "2026-08-22", "result": "ΚΕΝΟ", "evidence": "render.yaml: region: frankfurt (goalaso-api)· apps/mobile/app.json: updates.url https://u.expo.dev/…· η πολιτική λέει μόνο «υποδομή Supabase»" }
+    },
+    {
+      "id": "C14",
+      "claim": "Απαντάμε σε αιτήματα για δεδομένα εντός 30 ημερών",
+      "anchor": { "el": "απαντάμε εντός 30 ημερών", "en": "we'll respond within 30 days" },
+      "app": { "kind": "manual", "how": "δοκιμαστικό email στο goalaso05@gmail.com και χρονόμετρο — διαδικασία, όχι κώδικας" },
+      "measured": { "date": "2026-08-22", "result": "ΔΕΝ ΕΛΕΓΧΕΤΑΙ ΑΥΤΟΜΑΤΑ", "evidence": "ΔΕΝ ΜΕΤΡΗΘΗΚΕ αν το mailbox απαντά (θέλει άνθρωπο — SCORECARD Α3)" }
+    },
+    {
+      "id": "C15",
+      "claim": "Η εφαρμογή δεν απευθύνεται σε παιδιά κάτω των 18",
+      "anchor": { "el": "δεν απευθύνεται σε παιδιά κάτω των 18", "en": "not directed at children under 18" },
+      "app": { "kind": "manual", "how": "δήλωση πρόθεσης· δεν υπάρχει age gate στον κώδικα — απόφαση ιδιοκτήτη αν χρειάζεται" },
+      "measured": { "date": "2026-08-22", "result": "ΔΕΝ ΕΛΕΓΧΕΤΑΙ ΑΥΤΟΜΑΤΑ", "evidence": "καμία πύλη ηλικίας στο apps/mobile/src (δεν μετρήθηκε με pattern — δήλωση διαδικασίας)" }
+    }
+  ]
+}

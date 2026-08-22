@@ -41,5 +41,9 @@ jobs:
         run: node scripts/deploy-check.mjs
       - name: "deploy:prove — απόδειξη G05 (τοπικός HTTP server)"
         run: node scripts/deploy-prove.mjs
+      - name: "claims:check — G01 ο κατάλογος ισχυρισμών δένει με το κείμενο, χρέος με λήξη, μέτρηση όχι παλιότερη από 60 ημέρες"
+        run: node scripts/claims-check.mjs
+      - name: "claims:prove — απόδειξη G01 (συνθετικός κατάλογος + ψεύτικη εφαρμογή)"
+        run: node scripts/claims-prove.mjs
       - name: "catalogue:check — το STATUS.md παράγεται από τους φύλακες, δεν γράφεται"
         run: node scripts/catalogue-status.mjs --check
