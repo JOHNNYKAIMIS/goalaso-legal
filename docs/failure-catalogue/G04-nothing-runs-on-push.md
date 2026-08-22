@@ -1,7 +1,9 @@
 <!--catalogue
 id: G04
 title: Τίποτα δεν τρέχει σε push
-kind: open
+kind: guarded
+guard: scripts/html-check.mjs
+prove: scripts/html-prove.mjs
 -->
 
 # G04 — Τίποτα δεν τρέχει σε push
@@ -25,6 +27,8 @@ ls package.json Makefile 2>/dev/null    # τίποτα — κανένα τοπι
 gh api repos/JOHNNYKAIMIS/goalaso-legal/actions/workflows --jq '.workflows[].path'
 # dynamic/pages/pages-build-deployment — μόνο το GitHub Pages deploy (4/4 runs success), δεν ζει στο repo
 gh api repos/JOHNNYKAIMIS/goalaso-legal/branches/main/protection    # 404 — καμία προστασία
+gh api "repos/JOHNNYKAIMIS/goalaso-legal/actions/runs?branch=quality-baseline" --jq .total_count
+# 0 — το push του cc73d1f (2026-08-22) δεν πυροδότησε τίποτα: αναπαραγωγή της κλάσης, όχι υπόθεση
 ```
 
 Δηλαδή κάθε push στο main δημοσιεύεται μέσα σε δευτερόλεπτα (push 16:23:26Z → run 16:23:31Z)
@@ -47,3 +51,26 @@ N links») και fail-closed (0 αρχεία HTML → exit 2, όχι πράσι
 Επειδή main = παραγωγή, το workflow πρέπει να τρέχει και σε `pull_request`· μέχρι να μπει branch
 protection (απόφαση ιδιοκτήτη, GitHub UI) η μόνη πύλη είναι ο κανόνας «ένα PR τη φορά, πράσινο
 πριν merge». Μετά το deploy: smoke που κάνει diff live ↔ HEAD (βλ. SCORECARD, Γ).
+
+## Ο φύλακας (γύρος 1 — 2026-08-22)
+
+| | |
+|---|---|
+| Φύλακας | `node scripts/html-check.mjs [φάκελος]` — (α) doctype, `<html lang>`, `<title>`, ισοζύγιο tags, attributes με εισαγωγικά· (β) κάθε σχετικό `href`/`src` δείχνει σε υπαρκτό αρχείο· (γ) έγκυρο UTF-8 χωρίς BOM, `<meta charset="utf-8">`, 0 mojibake |
+| Απόδειξη | `node scripts/html-prove.mjs` — αντίγραφο σε προσωρινό φάκελο: αμετάβλητο → πράσινο· κάθε μετάλλαξη → κόκκινο ΜΕ το αναμενόμενο μήνυμα· κάθε αθώα αλλαγή → πράσινο· κενός/ανύπαρκτος φάκελος → exit 2 |
+| Πού τρέχει | `.github/workflows/quality.yml` — σε κάθε `push` και `pull_request`, χωρίς εξαρτήσεις, `actions/checkout` καρφωμένο σε SHA |
+| Κατάσταση | ΠΑΡΑΓΕΤΑΙ: [STATUS.md](STATUS.md) από `node scripts/catalogue-status.mjs` — το CI κοκκινίζει αν το αρχείο είναι παλιό (`--check`) |
+| Λογοδοσία | η γραμμή επιτυχίας λέει ΑΠΟ ΠΟΣΑ: «✓ html:check — 3 αρχεία (…), 2 εσωτερικά links (2 υπαρκτά), 2 εξωτερικά (ΔΕΝ ελέγχθηκαν), 6 mailto, 0 mojibake» |
+| Fail-closed | 0 αρχεία HTML ή ανύπαρκτος φάκελος → exit 2 «δεν μπορώ να κρίνω», ποτέ πράσινο |
+
+**Τι ΔΕΝ φυλάει** (ρητά): πλήρη συμμόρφωση W3C (ο ελεγκτής είναι δομικός, χωρίς εξαρτήσεις —
+και αυστηρότερος σε ένα σημείο: κάθε μη-void στοιχείο κλείνει ρητά)· εξωτερικά links (μετρώνται,
+δεν γίνεται fetch — θα ήθελε ξεχωριστό, προγραμματισμένο job για να μην είναι το CI ευάλωτο σε
+δίκτυο)· τέλη γραμμής CRLF. Το (δ) — οι φύλακες G02/G03 — είναι οι δικές τους κλάσεις και
+κουμπώνουν στο ίδιο workflow στους επόμενους γύρους.
+
+**Τι έπιασε η απόδειξη πριν καν μπει στο CI (2026-08-22):** η πρώτη έκδοση του φύλακα ήταν
+ΚΟΚΚΙΝΗ στον σημερινό, καθαρό κώδικα — ο έλεγχος «attribute χωρίς εισαγωγικά» σάρωνε και μέσα
+στις τιμές, οπότε το `content="width=device-width, …"` (γρ. 5, και στα 3 αρχεία) πιάστηκε από το
+`=d`. Η περίπτωση «αμετάβλητο αντίγραφο → πράσινο» του prove έπεσε πρώτη. Χωρίς απόδειξη, ο
+φύλακας θα είχε μπει στο CI κόκκινος και θα είχε «διορθωθεί» με απενεργοποίηση.

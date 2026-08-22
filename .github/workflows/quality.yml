@@ -1,0 +1,28 @@
+name: quality
+
+# Κλάση G04 (docs/failure-catalogue/G04-nothing-runs-on-push.md): κάθε push και κάθε PR περνά από τους φύλακες.
+# Καμία εξάρτηση, κανένα npm install — μόνο το Node του runner.
+# Το main είναι η παραγωγή (GitHub Pages): το workflow τρέχει και σε pull_request ώστε το κόκκινο να φανεί ΠΡΙΝ το merge.
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: "html check + prove + catalogue status"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: "Node του runner"
+        run: node --version
+      - name: "html:check — G04 (α) δομή, (β) εσωτερικά links, (γ) κωδικοποίηση"
+        run: node scripts/html-check.mjs
+      - name: "html:prove — απόδειξη ότι ο φύλακας κοκκινίζει όταν σπάσει ό,τι φυλάει"
+        run: node scripts/html-prove.mjs
+      - name: "catalogue:check — το STATUS.md παράγεται από τους φύλακες, δεν γράφεται"
+        run: node scripts/catalogue-status.mjs --check

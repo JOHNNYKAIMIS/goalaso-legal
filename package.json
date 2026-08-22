@@ -1,0 +1,16 @@
+{
+  "name": "goalaso-legal",
+  "private": true,
+  "description": "Νομικές σελίδες Goalaso — φύλακες ποιότητας, χωρίς εξαρτήσεις (βλ. docs/SCORECARD.md)",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "html:check": "node scripts/html-check.mjs",
+    "html:prove": "node scripts/html-prove.mjs",
+    "catalogue:status": "node scripts/catalogue-status.mjs",
+    "catalogue:check": "node scripts/catalogue-status.mjs --check",
+    "check": "npm run html:check && npm run html:prove && npm run catalogue:check"
+  }
+}
