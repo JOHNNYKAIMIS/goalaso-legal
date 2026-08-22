@@ -8,7 +8,7 @@
       "claim": "C16",
       "measured": "2026-08-22",
       "expires": "2026-09-21",
-      "reason": "Η ιστοσελίδα goalaso.net (apps/guest-web) συλλέγει email στη λίστα αναμονής χωρίς κανέναν σύνδεσμο προς την πολιτική απορρήτου (0 αναφορές στο src). Διορθώνεται ΜΟΝΟ στο repo της εφαρμογής: σύνδεσμος προς https://johnnykaimis.github.io/goalaso-legal/privacy.html στη φόρμα/footer — απόφαση ιδιοκτήτη."
+      "reason": "Η ιστοσελίδα goalaso.net (apps/guest-web) συλλέγει email στη λίστα αναμονής χωρίς κανέναν σύνδεσμο προς την πολιτική απορρήτου (0 αναφορές στο src). Διορθώνεται ΜΟΝΟ στο repo της εφαρμογής: σύνδεσμος προς https://johnnykaimis.github.io/goalaso-legal/privacy.html στη φόρμα/footer — ζητήθηκε στο https://github.com/JOHNNYKAIMIS/goalaso/issues/13 (2026-08-22), απόφαση ιδιοκτήτη."
     }
   ]
 }
