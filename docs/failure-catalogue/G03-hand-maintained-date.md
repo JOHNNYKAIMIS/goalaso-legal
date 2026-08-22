@@ -60,8 +60,7 @@ commit 30421cc 2026-08-03`. Το terms.html (3 Αυγούστου = `9bfa4b6 202
 αγγίζει σελίδα. Το **«Squash and merge» φτιάχνει νέο commit με author date τη μέρα του merge**: αν
 γίνει squash, η σελίδα πρέπει να λέει τη μέρα του merge, αλλιώς κόκκινο (η απόδειξη το δείχνει:
 `squash-merge-makes-new-author-date` → κόκκινο, `rebase-or-merge-commit-keeps-author-date` → πράσινο).
-Σύσταση: στο repo, Settings → Pull Requests → απενεργοποίηση του «Allow squash merging» (απόφαση
-ιδιοκτήτη).
+Έγινε στον γύρο 8 (2026-08-22): `gh api repos/JOHNNYKAIMIS/goalaso-legal --jq .allow_squash_merge` → `false`.
 
 **Δρόμος κλεισίματος του χρέους (απόφαση ιδιοκτήτη):** commit `[no-date] privacy: ημερομηνία 3
 Αυγούστου 2026` (και «August 3, 2026») + αφαίρεση της εγγραφής από το known-debt.json. Τότε το

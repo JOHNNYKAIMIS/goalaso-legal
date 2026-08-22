@@ -48,9 +48,13 @@ gh api "repos/JOHNNYKAIMIS/goalaso-legal/actions/runs?branch=quality-baseline" -
 N links») και fail-closed (0 αρχεία HTML → exit 2, όχι πράσινο). Και το workflow αποκτά
 απόδειξη: ένα prove script που σπάει επίτηδες ένα αντίγραφο και επιβεβαιώνει το κόκκινο.
 
-Επειδή main = παραγωγή, το workflow πρέπει να τρέχει και σε `pull_request`· μέχρι να μπει branch
-protection (απόφαση ιδιοκτήτη, GitHub UI) η μόνη πύλη είναι ο κανόνας «ένα PR τη φορά, πράσινο
-πριν merge». Μετά το deploy: smoke που κάνει diff live ↔ HEAD (βλ. SCORECARD, Γ).
+Επειδή main = παραγωγή, το workflow τρέχει και σε `pull_request`. **Γύρος 8 (2026-08-22): branch
+protection στο main** — required status check «html check + prove + catalogue status»,
+`enforce_admins=true`, όχι force push / διαγραφή. Απόδειξη: απευθείας push κενού commit στο main →
+`GH006: Protected branch update failed`, τίποτα δεν μπήκε
+(`gh api repos/JOHNNYKAIMIS/goalaso-legal/branches/main/protection`). Από εδώ η κλάση δεν μπορεί να
+ξαναγίνει: καμία αλλαγή δεν φτάνει στο main χωρίς πράσινο check. Μετά το deploy: smoke που κάνει diff
+live ↔ main (κλάση G05).
 
 ## Ο φύλακας (γύρος 1 — 2026-08-22)
 
