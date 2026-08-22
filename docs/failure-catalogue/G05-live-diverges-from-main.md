@@ -4,6 +4,7 @@ title: Το ζωντανό site αποκλίνει από το main
 kind: guarded
 guard: scripts/deploy-check.mjs
 prove: scripts/deploy-prove.mjs
+volatile: yes
 -->
 
 # G05 — Το ζωντανό site αποκλίνει από το main
@@ -47,6 +48,14 @@ Pages). Με απόδειξη σε τοπικό HTTP server που παίζει 
 | Πού τρέχει | `.github/workflows/quality.yml` (push + PR, παράθυρο 600 s στο main) και `.github/workflows/deploy-smoke.yml` (καθημερινά 06:17 UTC + χειροκίνητα — drift) |
 | Λογοδοσία | «✓ deploy:check — 3/3 αρχεία του origin/main @ 30421cc ταυτίζονται byte-προς-byte με https://… (index.html 603 B, privacy.html 8104 B, terms.html 5941 B) — δοκιμή 1, 0,8 s, χωρίς CDN cache» |
 | Fail-closed | ref `origin/main` δεν υπάρχει (ρηχό checkout), 0 αρχεία HTML στο main, καμία απάντηση HTTP → exit 2. HTTP 404/5xx ή διαφορά μετά το παράθυρο → exit 1 |
+
+**Τι έπιασαν οι αποδείξεις πριν μπει ο φύλακας (2026-08-22):** (1) `process.exit()` αμέσως μετά
+από `fetch` σκάει στα Windows (libuv `UV_HANDLE_CLOSING`, exit 0xC0000409) — τα κόκκινα μονοπάτια
+επιβίωναν μόνο χάρη στις παύσεις του polling· διόρθωση `process.exitCode`. (2) Στο CI, το
+`catalogue:check` έπεσε (run 32577222493 @ `6ecaaac`): η γραμμή επιτυχίας περιείχε «δοκιμή 1, 0.2 s»
+και το SHA του origin/main — μεταβλητά ανά run, όχι ανά commit — οπότε το STATUS.md ήταν «παλιό» στον
+runner. Γι' αυτό η κεφαλίδα έχει `volatile: yes`: το STATUS κρατά μόνο πράσινο/κόκκινο, η λογοδοσία
+πλήθους μένει στο log.
 
 **Τι ΔΕΝ φυλάει (ρητά):** ότι το Pages δεν θα σερβίρει και άλλα αρχεία (π.χ. `docs/*.md` — σερβίρονται
 ως raw, ακίνδυνο)· ότι το custom domain (`goalaso.net`) δείχνει εδώ — δεν δείχνει, είναι το SPA της

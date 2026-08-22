@@ -10,6 +10,7 @@
 //   kind: open | guarded
 //   guard: scripts/html-check.mjs      (μόνο για guarded — exit 0 = πράσινο)
 //   prove: scripts/html-prove.mjs      (μόνο για guarded — exit 0 = η απόδειξη στέκει)
+//   volatile: yes                      (προαιρετικό: η γραμμή του φύλακα εξαρτάται από live/main → μόνο πράσινο/κόκκινο εδώ)
 //   -->
 // ΦΥΛΑΣΣΕΤΑΙ = φύλακας πράσινος ΚΑΙ απόδειξη πράσινη · ΑΝΟΙΧΤΗ = kind: open · ΣΠΑΣΜΕΝΟΣ ΦΥΛΑΚΑΣ = guarded αλλά κάτι πέφτει.
 // Έξοδος: 0 = STATUS.md γράφτηκε/ταιριάζει και όλα συνεπή · 1 = σπασμένος φύλακας, ασυνέπεια κεφαλίδας ή παλιό STATUS.md · 2 = 0 κλάσεις
@@ -73,7 +74,10 @@ for (const f of files) {
     const p = runScript(h.prove);
     const ok = g.code === 0 && p.code === 0;
     if (ok) guarded++; else broken++;
-    rows.push(`| ${h.id} | [${h.title}](${f}) | ${ok ? '**ΦΥΛΑΣΣΕΤΑΙ**' : '**ΣΠΑΣΜΕΝΟΣ ΦΥΛΑΚΑΣ**'} | \`node ${h.guard}\` → ${g.summary} | \`node ${h.prove}\` → ${p.summary} |`);
+    // volatile: yes — ο φύλακας εξαρτάται από live/main (χρόνος, SHA, μεγέθη που αλλάζουν χωρίς commit εδώ):
+    // το STATUS.md κρατά μόνο πράσινο/κόκκινο, αλλιώς θα ήταν «παλιό» σε κάθε run. Η λογοδοσία πλήθους μένει στο log.
+    const gSummary = h.volatile === 'yes' ? (g.code === 0 ? '✓ πράσινο (εξαρτάται από live/main — λογοδοσία στο log του CI)' : `✗ κόκκινο (exit ${g.code})`) : g.summary;
+    rows.push(`| ${h.id} | [${h.title}](${f}) | ${ok ? '**ΦΥΛΑΣΣΕΤΑΙ**' : '**ΣΠΑΣΜΕΝΟΣ ΦΥΛΑΚΑΣ**'} | \`node ${h.guard}\` → ${gSummary} | \`node ${h.prove}\` → ${p.summary} |`);
   } else {
     open++;
     rows.push(`| ${h.id} | [${h.title}](${f}) | ΑΝΟΙΧΤΗ | — | — |`);
