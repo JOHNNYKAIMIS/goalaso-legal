@@ -5,8 +5,8 @@
   "app": {
     "repo": "https://github.com/JOHNNYKAIMIS/goalaso",
     "localPath": "../goalaso",
-    "measuredAt": "2026-08-22",
-    "commit": "ad56785"
+    "measuredAt": "2026-11-21",
+    "commit": "5ddbfadb"
   },
   "claims": [
     {
@@ -53,10 +53,10 @@
     },
     {
       "id": "C04c",
-      "claim": "Στο email της λίστας αναμονής δεν στέλνεται τίποτα άλλο — σήμερα δεν υπάρχει καν email provider",
+      "claim": "Στο email της λίστας αναμονής δεν στέλνεται τίποτα άλλο — κανένας αποστολέας email ή ειδοποιήσεων δεν διαβάζει τη λίστα",
       "anchor": { "el": "τίποτα άλλο", "en": "nothing else" },
-      "app": { "kind": "absent", "pattern": "resend\\.com|api\\.resend|nodemailer|sendgrid|postmark|mailgun", "paths": ["backend/src"] },
-      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία — κανένας email provider στο backend/src· όταν μπει, ο φύλακας κοκκινίζει και η πολιτική ξανακοιτάζεται" }
+      "app": { "kind": "absent", "pattern": "waitlist_emails|waitlistRepo\\.js", "paths": ["backend/src/lib", "backend/src/modules/venueApp", "backend/src/modules/notifications", "backend/src/worker.js"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία· η λίστα ζει μόνο στο waitlistRepo.js + guestRouter.js (POST /waitlist)· το μοτίβο = import του waitlistRepo.js ή ο πίνακας, όχι σχόλιο (το notifications/router.js το αναφέρει μόνο σε σχόλιο). ΙΣΤΟΡΙΚΟ: ως 22/8 η μέτρηση ήταν «κανένας email provider» — από τότε μπήκε η Resend (backend/src/lib/resend.js, email γηπεδούχων) και το auth SMTP, άρα η μέτρηση έγινε «κανένας αποστολέας δεν διαβάζει τη λίστα» (goalaso #795, 21/11)" }
     },
     {
       "id": "C05",
@@ -67,10 +67,17 @@
     },
     {
       "id": "C06",
-      "claim": "Καμία live τοποθεσία GPS",
-      "anchor": { "el": "Καμία live τοποθεσία GPS", "en": "No live GPS location" },
-      "app": { "kind": "absent", "pattern": "expo-location|react-native-geolocation|@react-native-community/geolocation", "paths": ["apps/mobile/package.json", "apps/mobile/app.json"] },
-      "measured": { "date": "2026-08-22", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία" }
+      "claim": "Καμία παρακολούθηση τοποθεσίας — ούτε στο παρασκήνιο, ούτε με την εφαρμογή ανοιχτή",
+      "anchor": { "el": "δεν υπάρχει καμία παρακολούθηση", "en": "there is no tracking" },
+      "app": { "kind": "absent", "pattern": "requestBackgroundPermissionsAsync|startLocationUpdatesAsync|watchPositionAsync|startGeofencingAsync", "paths": ["apps/mobile/src"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "0 αρχεία. ΙΣΤΟΡΙΚΟ: ως 21/11 η πολιτική έλεγε «Καμία live τοποθεσία GPS» — ΔΙΑΨΕΥΣΜΕΝΟ από το expo-location (μετρημένο 1/9, goalaso docs/privacy-location-correction.md · #279)· το κείμενο της 1/9 μπήκε αυτούσιο 21/11 (goalaso #795)" }
+    },
+    {
+      "id": "C06b",
+      "claim": "Η τοποθεσία διαβάζεται μόνο με άδεια, μία φορά, για ταξινόμηση γηπέδων — και δεν αποθηκεύεται",
+      "anchor": { "el": "αν δώσεις άδεια, διαβάζουμε τη θέση σου", "en": "if you grant permission, we read your position" },
+      "app": { "kind": "present", "pattern": "requestForegroundPermissionsAsync", "paths": ["apps/mobile/src/hooks"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "apps/mobile/src/hooks/use-device-location.ts (άδεια foreground + getCurrentPositionAsync, κατ' απαίτηση) · «δεν αποθηκεύεται» = φύλακας της εφαρμογής backend/test/userLocationNeverStored.test.js (η θέση ζει μόνο στο venues/router.js, ποτέ σε log)" }
     },
     {
       "id": "C07",
@@ -151,9 +158,88 @@
     },
     {
       "id": "C16",
-      "claim": "ΚΕΝΟ: η ιστοσελίδα goalaso.net συλλέγει email στη λίστα αναμονής χωρίς κανέναν σύνδεσμο προς την πολιτική απορρήτου",
-      "app": { "kind": "absent", "pattern": "goalaso-legal|privacy\\.html|απόρρητ", "paths": ["apps/guest-web/src"] },
-      "measured": { "date": "2026-08-22", "result": "ΚΕΝΟ", "evidence": "0 αναφορές σε πολιτική απορρήτου στο apps/guest-web/src (Landing.tsx, strings.ts) ενώ το POST /waitlist συλλέγει email· διορθώνεται μόνο στο repo της εφαρμογής (σύνδεσμος στο footer/φόρμα)" }
+      "claim": "Η ιστοσελίδα goalaso.net δείχνει σύνδεσμο προς την πολιτική απορρήτου εκεί που συλλέγει email (λίστα αναμονής)",
+      "anchor": { "el": "Email λίστας αναμονής", "en": "Waitlist email" },
+      "app": { "kind": "present", "pattern": "goalaso-legal|privacy\\.html", "paths": ["apps/guest-web/src"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "apps/guest-web/src/Landing.tsx. ΙΣΤΟΡΙΚΟ: ως τότε ΚΕΝΟ (0 αναφορές, 22/8 — goalaso#13)· διορθώθηκε στο repo της εφαρμογής, το χρέος έληξε 21/9 και αφαιρέθηκε 21/11" }
+    },
+    {
+      "id": "C17",
+      "claim": "Το κινητό του γηπεδούχου μόνο με ρητή συγκατάθεση — το κουτάκι λέει ΑΚΡΙΒΩΣ ό,τι παραθέτει η πολιτική",
+      "anchor": { "el": "Συμφωνώ να με καλείτε στο κινητό για το γήπεδό μου στο Goalaso", "en": "I agree to be called on my mobile about my venue on Goalaso" },
+      "_anchor": "Η ελληνική άγκυρα υπάρχει ΜΟΝΟ στο ελληνικό κείμενο (το αγγλικό λέει μόνο τη μετάφραση) — αλλιώς ο έλεγχος θα περνούσε και χωρίς αυτήν (αντίπαλος 21/11).",
+      "app": { "kind": "present", "pattern": "Συμφωνώ να με καλείτε στο κινητό για το γήπεδό μου στο Goalaso\\.", "paths": ["apps/venue-web/src/strings.ts"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "apps/venue-web/src/strings.ts (start.consent) · ο server αρνείται κινητό χωρίς «Συμφωνώ» (consent_required — signupSchemas.js + venue_claim/venue_self_signup της 088)" }
+    },
+    {
+      "id": "C18",
+      "claim": "Η ανοιχτή αίτηση γηπεδούχου (και το κινητό της) σβήνεται το πολύ σε 90 μέρες",
+      "anchor": { "el": "το πολύ 90 μέρες", "en": "90 days at most" },
+      "app": { "kind": "present", "pattern": "PURGE_AFTER = '90 days'", "paths": ["backend/src/modules/venueApp/signupRouter.js"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "signupRouter.js PURGE_AFTER · σβήσιμο venue_leads_purge (088) · απόρριψη/απόσυρση ⇒ trigger venue_verifications_forget_closed (089)" }
+    },
+    {
+      "id": "C19",
+      "claim": "Το κινητό του επιβεβαιωμένου μένει ως να ζητήσει να σβηστεί ή να διαγράψει τον λογαριασμό του",
+      "anchor": { "el": "ως να μας ζητήσεις να το σβήσουμε ή να διαγράψεις τον λογαριασμό σου", "en": "until you ask us to delete it or you delete your account" },
+      "app": { "kind": "present", "pattern": "create or replace function public\\.venue_phone_forget", "paths": ["supabase/migrations/20261121000096_venue_phone_forget.sql"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "096 venue_phone_forget — «Σβήσε το κινητό» του admin, όταν το ζητήσει με email (goalaso #795, owner 21/11). Η διαγραφή λογαριασμού = C19b" }
+    },
+    {
+      "id": "C19b",
+      "claim": "Η διαγραφή λογαριασμού στο venues σβήνει το κινητό και κλείνει τις ανοιχτές αιτήσεις",
+      "anchor": { "el": "οι ανοιχτές αιτήσεις σου κλείνουν και το κινητό σβήνεται", "en": "your open requests are closed and the mobile is deleted" },
+      "app": { "kind": "present", "pattern": "create trigger users_forget_venue_phone", "paths": ["supabase/migrations/20261111000089_venue_phone_stays_verified.sql"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "089 users_forget_venue_phone (κινητό) · 091 users_depart_venues (αποχώρηση από γήπεδα, κλείσιμο ανοιχτών αιτήσεων) — και τα δύο στο UPDATE auth_id ⇒ null της διαγραφής" }
+    },
+    {
+      "id": "C20",
+      "claim": "Τα email στέλνονται μέσω της Resend (αποστολή Ιρλανδία, δεδομένα στις ΗΠΑ με SCC + DPF)",
+      "anchor": { "el": "στέλνονται μέσω της Resend από την Ιρλανδία", "en": "sent through Resend from Ireland" },
+      "app": { "kind": "present", "pattern": "api\\.resend\\.com", "paths": ["backend/src/lib"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "backend/src/lib/resend.js · περιοχή: DNS send.goalaso.net MX = feedback-smtp.eu-west-1.amazonses.com (21/11) · resend.com/docs/dashboard/domains/regions: «All account data … is stored in the United States regardless of the sending region» · resend.com/legal/dpa §6.2 SCC, §11.1 EU-U.S. DPF" }
+    },
+    {
+      "id": "C21",
+      "claim": "Το κινητό του γηπεδούχου το βλέπει μόνο η ομάδα του Goalaso — ποτέ άλλος ιδιοκτήτης, ποτέ οι παίκτες",
+      "anchor": { "el": "Το βλέπει μόνο η ομάδα του Goalaso", "en": "Only the Goalaso team sees it" },
+      "app": { "kind": "manual", "how": "φύλακας της εφαρμογής: backend/test/venueAppDesk468.test.js (#795 — η ομάδα του ιδιοκτήτη δεν κουβαλά κινητό) · RLS deny-all στο venue_verifications" },
+      "measured": { "date": "2026-11-21", "result": "ΔΕΝ ΕΛΕΓΧΕΤΑΙ ΑΥΤΟΜΑΤΑ", "evidence": "το κινητό φεύγει ΜΟΝΟ από το /admin/venue-app (requireAdmin)· pattern δεν αρκεί — το κρίνει το τεστ διαδρομής της εφαρμογής" }
+    },
+    {
+      "id": "C22",
+      "claim": "Η εφαρμογή γηπέδων (venues.goalaso.net) δείχνει σύνδεσμο προς την ενότητα «Γηπεδούχοι» εκεί που ζητά κινητό και λογαριασμό",
+      "anchor": { "el": "Γηπεδούχοι (venues.goalaso.net)", "en": "Venue owners (venues.goalaso.net)" },
+      "app": { "kind": "present", "pattern": "goalaso-legal/privacy\\.html#venues", "paths": ["apps/venue-web/src/strings.ts"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "apps/venue-web/src/strings.ts start.privacyUrl ⇒ Claim.tsx + Call.tsx (δίπλα στο «Συμφωνώ») + Signup.tsx (βήμα λογαριασμού) — goalaso #795, 21/11· ότι ΦΑΙΝΕΤΑΙ το κρίνουν τα vitest της εφαρμογής (phone-asks · start · signup) με μεταλλάξεις" }
+    },
+    {
+      "id": "C23",
+      "claim": "Το κινητό και το «Συμφωνώ» είναι προϋπόθεση της αίτησης — χωρίς αυτά δεν στέλνεται (GDPR 13(2)(ε))",
+      "anchor": { "el": "χωρίς αυτά η αίτηση δεν στέλνεται", "en": "without them the request is not sent" },
+      "app": { "kind": "present", "pattern": "S\\.start\\.needConsent", "paths": ["apps/venue-web/src/screens/Claim.tsx"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "Claim.tsx submit: badMobile χωρίς κινητό · needConsent χωρίς τσεκάρισμα (αντίπαλος 21/11: η πολιτική έλεγε «μόνο αν το δώσεις»)· αν γίνει προαιρετικό, ο φύλακας κοκκινίζει και η πολιτική ξανακοιτάζεται" }
+    },
+    {
+      "id": "C24",
+      "claim": "Η φόρμα της αίτησης γηπεδούχου χρησιμοποιεί Cloudflare Turnstile",
+      "anchor": { "el": "προστατεύεται από bots με το Cloudflare Turnstile", "en": "protected from bots by Cloudflare Turnstile" },
+      "app": { "kind": "present", "pattern": "challenges\\.cloudflare\\.com", "paths": ["apps/venue-web/src/lib"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "apps/venue-web/src/lib/turnstile.ts · server: backend/src/lib/turnstile.js (siteverify)" }
+    },
+    {
+      "id": "C25",
+      "claim": "Οι ειδοποιήσεις του venues κρατούν τη διεύθυνση push του browser ως να κλείσουν ή ως την αποσύνδεση",
+      "anchor": { "el": "διεύθυνση ειδοποιήσεων του browser σου", "en": "notification address until you turn them off or sign out" },
+      "app": { "kind": "present", "pattern": "pushManager\\.subscribe", "paths": ["apps/venue-web/src/lib"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "apps/venue-web/src/lib/push.ts ⇒ venue_push_subscriptions · αποσύνδεση/αλλαγή κωδικού ⇒ ON DELETE CASCADE από το auth.sessions (095, #888)" }
+    },
+    {
+      "id": "C26",
+      "claim": "Η βιντεοκλήση επιβεβαίωσης γίνεται σε WhatsApp ή Viber",
+      "anchor": { "el": "(σε WhatsApp ή Viber)", "en": "(on WhatsApp or Viber)" },
+      "app": { "kind": "present", "pattern": "WhatsApp ή Viber", "paths": ["apps/venue-web/src/strings.ts"] },
+      "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "strings.ts call.intro / call.weCall: «Σε καλούμε εμείς σε WhatsApp ή Viber»" }
     }
   ]
 }
