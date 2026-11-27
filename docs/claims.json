@@ -247,6 +247,13 @@
       "anchor": { "el": "(σε WhatsApp ή Viber)", "en": "(on WhatsApp or Viber)" },
       "app": { "kind": "present", "pattern": "WhatsApp ή Viber", "paths": ["apps/venue-web/src/strings.ts"] },
       "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "strings.ts call.intro / call.weCall: «Σε καλούμε εμείς σε WhatsApp ή Viber»" }
+    },
+    {
+      "id": "C27",
+      "claim": "Η εθνικότητα είναι προαιρετικό πεδίο του προφίλ, ποτέ στην εγγραφή, μόνο για την πρόταση πλευράς σε αγώνα εθνικών· οι άλλοι βλέπουν μόνο την πλευρά",
+      "anchor": { "el": "οι άλλοι βλέπουν μόνο την πλευρά που διάλεξες — ποτέ την ίδια την εθνικότητα", "en": "others only ever see the side you picked — never the nationality itself" },
+      "app": { "kind": "present", "pattern": "add column if not exists nationality", "paths": ["supabase/migrations"] },
+      "measured": { "date": "2026-11-27", "result": "ΔΙΑΨΕΥΣΜΕΝΟΣ", "evidence": "ADR-078 §4 «η πολιτική πριν το πεδίο»: η γραμμή δημοσιεύεται ΠΡΩΤΗ (goalaso #363, owner 27/11 «Εγώ: PR + merge»)· η στήλη users.nationality δεν υπάρχει ακόμα (0 migrations) ⇒ γίνεται ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ με τη migration 099" }
     }
   ]
 }
