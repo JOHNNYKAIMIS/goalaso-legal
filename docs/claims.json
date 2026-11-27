@@ -5,8 +5,8 @@
   "app": {
     "repo": "https://github.com/JOHNNYKAIMIS/goalaso",
     "localPath": "../goalaso",
-    "measuredAt": "2026-11-21",
-    "commit": "5ddbfadb"
+    "measuredAt": "2026-11-27",
+    "commit": "134d8181"
   },
   "claims": [
     {
@@ -250,10 +250,10 @@
     },
     {
       "id": "C27",
-      "claim": "Η εθνικότητα είναι προαιρετικό πεδίο του προφίλ, ποτέ στην εγγραφή, μόνο για την πρόταση πλευράς σε αγώνα εθνικών· οι άλλοι βλέπουν μόνο την πλευρά",
-      "anchor": { "el": "οι άλλοι βλέπουν μόνο την πλευρά που διάλεξες — ποτέ την ίδια την εθνικότητα", "en": "others only ever see the side you picked — never the nationality itself" },
+      "claim": "Η εθνικότητα είναι προαιρετικό πεδίο του προφίλ, ποτέ στην εγγραφή, μόνο για την πρόταση πλευράς σε αγώνα εθνικών· οι άλλοι βλέπουν μόνο την πλευρά (προτεινόμενη ή επιλεγμένη), ποτέ την εθνικότητα",
+      "anchor": { "el": "οι άλλοι βλέπουν μόνο την πλευρά σου (την προτεινόμενη ή όποια διάλεξες) — ποτέ την ίδια την εθνικότητα", "en": "others only ever see your side (the suggested one or the one you picked) — never the nationality itself" },
       "app": { "kind": "present", "pattern": "add column if not exists nationality", "paths": ["supabase/migrations"] },
-      "measured": { "date": "2026-11-27", "result": "ΔΙΑΨΕΥΣΜΕΝΟΣ", "evidence": "ADR-078 §4 «η πολιτική πριν το πεδίο»: η γραμμή δημοσιεύεται ΠΡΩΤΗ (goalaso #363, owner 27/11 «Εγώ: PR + merge»)· η στήλη users.nationality δεν υπάρχει ακόμα (0 migrations) ⇒ γίνεται ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ με τη migration 099" }
+      "measured": { "date": "2026-11-27", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "goalaso 555b38a8 (#363): migration 20261127000099_user_nationality.sql (add column if not exists nationality + CHECK 249 ISO) · PATCH /identity/me μόνο από τον ίδιο · presentUser: ΜΟΝΟ στο /me, ποτέ στο /players/:id · camp = πάτημα › αγαπημένες › εθνικότητα, ΥΠΟΛΟΓΙΖΕΤΑΙ (η προτεινόμενη πλευρά φαίνεται στους άλλους — γι αυτό η φράση «προτεινόμενη ή όποια διάλεξες», owner 27/11) · anonymize τη σβήνει" }
     }
   ]
 }
