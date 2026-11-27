@@ -193,6 +193,13 @@
       "measured": { "date": "2026-11-21", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "089 users_forget_venue_phone (κινητό) · 091 users_depart_venues (αποχώρηση από γήπεδα, κλείσιμο ανοιχτών αιτήσεων) — και τα δύο στο UPDATE auth_id ⇒ null της διαγραφής" }
     },
     {
+      "id": "C19c",
+      "claim": "Μετά τη διαγραφή λογαριασμού στο venues, το ημερολόγιο πρόσβασης του γηπέδου κρατά μία γραμμή με όνομα και ρόλο — μόνο για την ομάδα του Goalaso",
+      "anchor": { "el": "μία γραμμή με το όνομά σου και τον ρόλο σου", "en": "one line with your name and your role" },
+      "app": { "kind": "present", "pattern": "subject_role, subject_name, at\\)", "paths": ["supabase/migrations/20261124000098_venue_access_subject_role_name.sql"] },
+      "measured": { "date": "2026-11-24", "result": "ΕΠΙΒΕΒΑΙΩΜΕΝΟΣ", "evidence": "098 venue_user_depart: η γραμμή «system · member_removed» γράφει subject_role (μόνο ενεργού μέλους) + subject_name από το OLD του trigger users_depart_venues — goalaso #821, owner 24/11 «Κράτα το όνομα» · «Εξαίρεση μόνο για admin» (ADR-108 Προσθήκη 24/11). Μόνο ο admin το διαβάζει (accessLogOf ⇒ /api/v1/admin, requireAdmin)" }
+    },
+    {
       "id": "C20",
       "claim": "Τα email στέλνονται μέσω της Resend (αποστολή Ιρλανδία, δεδομένα στις ΗΠΑ με SCC + DPF)",
       "anchor": { "el": "στέλνονται μέσω της Resend από την Ιρλανδία", "en": "sent through Resend from Ireland" },
